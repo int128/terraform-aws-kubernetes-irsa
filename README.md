@@ -1,4 +1,4 @@
-# terraform-aws-kubernetes-irsa
+# terraform-aws-kubernetes-irsa [![CircleCI](https://circleci.com/gh/int128/terraform-aws-kubernetes-irsa.svg?style=shield)](https://circleci.com/gh/int128/terraform-aws-kubernetes-irsa)
 
 This is a Terraform module for IAM Roles for Service Accounts (IRSA) on self hosted Kubernetes cluster.
 
