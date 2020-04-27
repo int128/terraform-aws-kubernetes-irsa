@@ -157,3 +157,33 @@ kubectl run aws -i --rm --image amazon/aws-cli --restart=Never --serviceaccount=
 ## Contributions
 
 This is an open source software. Feel free to open issues and pull requests.
+
+
+<!--terraform-docs-->
+## Requirements
+
+No requirements.
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | n/a |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| oidc\_ca\_sha1 | SHA1 thumbprint of the root CA certificate (default to \*.s3.amazonaws.com) | `string` | `"3fe05b486e3f0987130ba1d4ea0f299539a58243"` | no |
+| oidc\_jwks\_filename | Filename of OIDC JWKS | `any` | n/a | yes |
+| oidc\_s3\_bucket\_name | Name of a S3 bucket for the OIDC endpoint | `any` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| kops\_cluster\_yaml | Content of kops cluster.yaml |
+| oidc\_issuer | Domain name of the S3 bucket (\*.s3.amazonaws.com) |
+| oidc\_provider\_arn | ARN of the OIDC provider for IRSA |
+| pod\_identity\_webhook\_ecr\_repository\_url | URL to the ECR repository for eks/pod-identity-webhook |
+
