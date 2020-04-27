@@ -71,6 +71,10 @@ To build and push the Docker image of [pod-identity-webhook](https://github.com/
 1. Start a build.
 1. Make sure the image exists on the ECR repository.
 
+Take a look at the diagram.
+
+![diagram](diagram.svg)
+
 ### Configure the Kubernetes cluster
 
 Set the following API server flags.
