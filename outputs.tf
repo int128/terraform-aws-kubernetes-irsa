@@ -18,11 +18,11 @@ output "kops_cluster_yaml" {
   value       = <<EOF
 spec:
   fileAssets:
-  - content: {base64 sa-signer.key}
+  - content: ${replace(filebase64(var.signer_private_key_filename), "/=+/", "")}
     isBase64: true
     name: service-account-signing-key-file
     path: /srv/kubernetes/assets/service-account-signing-key
-  - content: {base64 sa-signer-pkcs8.pub}
+  - content: ${replace(filebase64(var.signer_public_key_filename), "/=+/", "")}
     isBase64: true
     name: service-account-key-file
     path: /srv/kubernetes/assets/service-account-key
