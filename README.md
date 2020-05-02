@@ -198,6 +198,8 @@ No requirements.
 | oidc\_ca\_sha1 | SHA1 thumbprint of the root CA certificate (default to \*.s3.amazonaws.com) | `string` | `"3fe05b486e3f0987130ba1d4ea0f299539a58243"` | no |
 | oidc\_jwks\_filename | Filename of OIDC JWKS | `any` | n/a | yes |
 | oidc\_s3\_bucket\_name | Name of a S3 bucket for the OIDC endpoint | `any` | n/a | yes |
+| signer\_private\_key\_filename | Filename of the private key (for kops\_cluster.yaml) | `string` | `"/dev/null"` | no |
+| signer\_public\_key\_filename | Filename of the private key (for kops\_cluster.yaml) | `string` | `"/dev/null"` | no |
 
 ## Outputs
 
