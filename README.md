@@ -1,14 +1,14 @@
 # terraform-aws-kubernetes-irsa [![CircleCI](https://circleci.com/gh/int128/terraform-aws-kubernetes-irsa.svg?style=shield)](https://circleci.com/gh/int128/terraform-aws-kubernetes-irsa)
 
 This is a Terraform module for IAM Roles for Service Accounts (IRSA) on a self-hosted Kubernetes cluster.
-It supports [kops](https://github.com/kubernetes/kops).
+It supports [kops](https://github.com/kubernetes/kops) clusters.
 
 
 ## Getting Started
 
-See also [self-hosted Kubernetes setup](https://github.com/aws/amazon-eks-pod-identity-webhook/blob/master/SELF_HOSTED_SETUP.md).
+This is based on [the self-hosted Kubernetes setup of pod-identity-webhook](https://github.com/aws/amazon-eks-pod-identity-webhook/blob/master/SELF_HOSTED_SETUP.md).
 
-### Generate a key pair
+### 1. Generate a key pair
 
 Generate a key pair and jwks document.
 
@@ -28,9 +28,9 @@ It will create the following files:
 - `./irsa/sa-signer-pkcs8.pub`
 - `./irsa/jwks.json`
 
-### Run Terraform
+### 2. Provision the AWS resources
 
-Provision the AWS resources.
+Run Terraform with the following file.
 
 ```tf
 resource "random_uuid" "irsa_s3_bucket_name" {
@@ -60,17 +60,32 @@ It will create the following resources:
 - ECR repository to store the image of pod-identity-webhook
 - CodeBuild project to build the image of pod-identity-webhook
 
-To build and push the Docker image of [pod-identity-webhook](https://github.com/aws/amazon-eks-pod-identity-webhook) to the ECR repository:
-
-1. Open the CodeBuild project.
-1. Start a build.
-1. Make sure the image exists on the ECR repository.
-
-Take a look at the diagram.
+See also the diagram.
 
 ![diagram](diagram.svg)
 
-If you are using kops, add the following items to generate a YAML file for cluster configuration.
+You will get the following outputs.
+
+```console
+% terraform output
+irsa_oidc_issuer = https://oidc-RANDOM.s3.amazonaws.com
+irsa_pod_identity_webhook_ecr_repository_url = REGISTRY_ID.dkr.ecr.REGION.amazonaws.com/eks/pod-identity-webhook
+```
+
+### 3. Configure the Kubernetes cluster
+
+Set the following API server flags.
+
+```
+--service-account-key-file=sa-signer-pkcs8.pub
+--service-account-signing-key-file=sa-signer.key
+--api-audiences=sts.amazonaws.com
+--service-account-issuer=https://oidc-RANDOM.s3.amazonaws.com
+```
+
+#### For kops users
+
+If you are using kops, you can generate a template of the cluster config.
 
 ```tf
 module "irsa" {
@@ -84,40 +99,35 @@ resource "local_file" "irsa_kops_cluster_yaml" {
 }
 ```
 
-### Configure the Kubernetes cluster
-
-Set the following API server flags.
-
-```
---service-account-key-file=sa-signer-pkcs8.pub
---service-account-signing-key-file=sa-signer.key
---api-audiences=sts.amazonaws.com
---service-account-issuer=https://oidc-RANDOM.s3.amazonaws.com
-```
-
-If you are using kops, edit the cluster configuration using the generated YAML file.
+You will get `irsa/kops.yaml` after applying.
 
 ```sh
+# get the template
+terraform apply
 less irsa/kops.yaml
 
+# apply the cluster config
 kops edit cluster
 kops update cluster
 kops rolling-update cluster
 ```
 
-### Deploy pod-identity-webhook to the cluster
+### 4. Deploy pod-identity-webhook
 
-To deploy the manifest of [pod-identity-webhook](https://github.com/aws/amazon-eks-pod-identity-webhook) to the Kubernetes cluster:
+You can build and push the Docker image of [pod-identity-webhook](https://github.com/aws/amazon-eks-pod-identity-webhook) to the ECR repository using the CodeBuild project.
+
+1. Open the CodeBuild project.
+1. Start a build.
+1. Make sure the image exists on the ECR repository.
+
+To deploy the manifest of pod-identity-webhook to the Kubernetes cluster:
 
 ```console
-% terraform output
-irsa_pod_identity_webhook_ecr_repository_url = REGISTRY_ID.dkr.ecr.REGION.amazonaws.com/eks/pod-identity-webhook
-
-% cd /amazon-eks-pod-identity-webhook
-% make cluster-up IMAGE=REGISTRY_ID.dkr.ecr.REGION.amazonaws.com/eks/pod-identity-webhook
+cd /amazon-eks-pod-identity-webhook
+make cluster-up IMAGE=REGISTRY_ID.dkr.ecr.REGION.amazonaws.com/eks/pod-identity-webhook
 ```
 
-### Verify a service account
+### 5. Verify a service account
 
 Create an IAM role.
 
