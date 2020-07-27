@@ -4,10 +4,11 @@ resource "aws_s3_bucket" "oidc" {
 }
 
 resource "aws_s3_bucket_object" "oidc_discovery" {
-  bucket  = var.oidc_s3_bucket_name
-  key     = "/.well-known/openid-configuration"
-  acl     = "public-read"
-  content = <<EOF
+  depends_on = [aws_s3_bucket.oidc]
+  bucket     = var.oidc_s3_bucket_name
+  key        = "/.well-known/openid-configuration"
+  acl        = "public-read"
+  content    = <<EOF
 {
   "issuer": "https://${aws_s3_bucket.oidc.bucket_domain_name}/",
   "jwks_uri": "https://${aws_s3_bucket.oidc.bucket_domain_name}/jwks.json",
@@ -30,10 +31,11 @@ EOF
 }
 
 resource "aws_s3_bucket_object" "oidc_jwks" {
-  bucket = var.oidc_s3_bucket_name
-  key    = "/jwks.json"
-  acl    = "public-read"
-  source = var.oidc_jwks_filename
+  depends_on = [aws_s3_bucket.oidc]
+  bucket     = var.oidc_s3_bucket_name
+  key        = "/jwks.json"
+  acl        = "public-read"
+  source     = var.oidc_jwks_filename
 }
 
 resource "aws_iam_openid_connect_provider" "irsa" {
